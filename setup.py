@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='line_only_receiver',
+    name='tx_tcp_line_client',
     version='0.1',
-    url="https://github.com/pantheon-systems/line_only_receiver@master",
+    url="https://github.com/pantheon-systems/tx_tcp_line_client@master",
     description='Twistd TCP Line Protocol Connection Pool',
     long_description='',
     author='Michael Liu',
