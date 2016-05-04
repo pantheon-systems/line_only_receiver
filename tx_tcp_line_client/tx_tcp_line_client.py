@@ -37,19 +37,6 @@ class Command(object):
         self.command = command
         self._deferred = Deferred()
 
-        def callback(value):
-            """callback to handle succesful Command response"""
-
-            pass
-
-        def errback(failure):
-            """errback to handle Command failure"""
-
-            log.error('Notification-service failure: {}'.format(failure))
-
-        self._deferred.addCallback(callback)
-        self._deferred.addErrback(errback)
-
     def success(self, value):
         """
         Shortcut method to fire the underlying deferred.
@@ -78,16 +65,13 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
             connection is dead and close it. It's expressed in seconds.
         @type timeOut: C{int}
         """
-        self._current = deque()
         self.persistentTimeOut = self.timeOut = timeOut
 
     def timeoutConnection(self):
         """
         Close the connection in case of timeout.
         """
-        while self._current:
-            cmd = self._current.popleft()
-            cmd.fail(TimeoutError("Connection timeout"))
+        log.info('Notification-service: connection timed-out')
 
         self.transport.loseConnection()
 
@@ -96,21 +80,18 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
         Receive line commands from the server.
         """
         self.resetTimeout()
-        cmd = self._current.popleft()
 
         # Only print if failed response
         if line != 'OK':
-            print "Got failed response:{}".format(line)
-            cmd.fail(ResponseError(line))
-        else:
-            cmd.success(line)
+            log.error("Got failed response: {}".format(line))
 
     def sendLine(self, line):
         """
         Override sendLine method
         """
 
-        if not self._current:
+        # Reset timeout 
+        if not self._TimeoutMixin__timeoutCall:
            self.setTimeout(self.persistentTimeOut)
 
         if not isinstance(line, str):
@@ -119,7 +100,6 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
                 (type(line),)))
         LineOnlyReceiver.sendLine(self, line)
         cmdObj = Command(line)
-        self._current.append(cmdObj)
         return cmdObj._deferred
 
     def connectionMade(self):
