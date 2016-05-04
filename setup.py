@@ -11,6 +11,10 @@ setup(
     license='BSD',
     keywords='Twistd TCP'.split(),
     platforms='any',
-    include_package_data=False
+    include_package_data=False,
     #test_suite='test_dashvisor.run_tests.run_all',
+    install_requires=[
+        "txconnpool>=0.1.1",
+        "Twisted>=12.2.0"
+    ],
 )
