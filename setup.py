@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tx_tcp_line_client',
-    version='0.1',
+    version='0.1.1',
     url="https://github.com/pantheon-systems/tx_tcp_line_client@master",
     description='Twistd TCP Line Protocol Connection Pool',
     long_description='',
