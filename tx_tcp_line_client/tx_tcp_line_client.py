@@ -1,5 +1,6 @@
 from collections import deque
 
+from twisted.python import log
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.protocols.policies import TimeoutMixin
 from twisted.internet.defer import Deferred, fail, TimeoutError
@@ -9,6 +10,11 @@ from txconnpool.pool import PooledClientFactory, Pool
 class ClientError(Exception):
     """
     Error caused by an invalid client call.
+    """
+
+class ResponseError(Exception):
+    """
+    Error caused by a bad response
     """
 
 class Command(object):
@@ -31,10 +37,24 @@ class Command(object):
         self.command = command
         self._deferred = Deferred()
 
+        def callback(value):
+            """callback to handle succesful Command response"""
+
+            pass
+
+        def errback(failure):
+            """errback to handle Command failure"""
+
+            log.error('Notification-service failure: {}'.format(failure))
+
+        self._deferred.addCallback(callback)
+        self._deferred.addErrback(errback)
+
     def success(self, value):
         """
         Shortcut method to fire the underlying deferred.
         """
+
         self._deferred.callback(value)
 
 
@@ -65,8 +85,10 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
         """
         Close the connection in case of timeout.
         """
-        for cmd in self._current:
+        while self._current:
+            cmd = self._current.popleft()
             cmd.fail(TimeoutError("Connection timeout"))
+
         self.transport.loseConnection()
 
     def lineReceived(self, line):
@@ -74,7 +96,14 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
         Receive line commands from the server.
         """
         self.resetTimeout()
-        print "Got response:{}".format(line)
+        cmd = self._current.popleft()
+
+        # Only print if failed response
+        if line != 'OK':
+            print "Got failed response:{}".format(line)
+            cmd.fail(ResponseError(line))
+        else:
+            cmd.success(line)
 
     def sendLine(self, line):
         """
