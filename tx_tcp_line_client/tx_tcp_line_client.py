@@ -65,13 +65,14 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
             connection is dead and close it. It's expressed in seconds.
         @type timeOut: C{int}
         """
-        self.persistentTimeOut = self.timeOut = timeOut
+        self.persistentTimeOut = timeOut
+        self.timeOut = None
 
     def timeoutConnection(self):
         """
         Close the connection in case of timeout.
         """
-        log.info('Notification-service: connection timed-out')
+        log.error('Notification-service: connection timed-out')
 
         self.transport.loseConnection()
 
@@ -79,19 +80,19 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
         """
         Receive line commands from the server.
         """
-        self.resetTimeout()
+        self.setTimeout(None)
 
         # Only print if failed response
         if line != 'OK':
-            log.error("Got failed response: {}".format(line))
+          log.error("Notification-service: Got failed response: {}".format(line))
 
     def sendLine(self, line):
         """
         Override sendLine method
         """
 
-        # Reset timeout 
-        if not self._TimeoutMixin__timeoutCall:
+        # Set timeout if there isn't already one running
+        if not self.timeOut:
            self.setTimeout(self.persistentTimeOut)
 
         if not isinstance(line, str):
