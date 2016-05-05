@@ -1,5 +1,6 @@
 from collections import deque
 
+from twisted.python import log
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.protocols.policies import TimeoutMixin
 from twisted.internet.defer import Deferred, fail, TimeoutError
@@ -9,6 +10,11 @@ from txconnpool.pool import PooledClientFactory, Pool
 class ClientError(Exception):
     """
     Error caused by an invalid client call.
+    """
+
+class ResponseError(Exception):
+    """
+    Error caused by a bad response
     """
 
 class Command(object):
@@ -35,6 +41,7 @@ class Command(object):
         """
         Shortcut method to fire the underlying deferred.
         """
+
         self._deferred.callback(value)
 
 
@@ -58,30 +65,34 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
             connection is dead and close it. It's expressed in seconds.
         @type timeOut: C{int}
         """
-        self._current = deque()
-        self.persistentTimeOut = self.timeOut = timeOut
+        self.persistentTimeOut = timeOut
+        self.timeOut = None
 
     def timeoutConnection(self):
         """
         Close the connection in case of timeout.
         """
-        for cmd in self._current:
-            cmd.fail(TimeoutError("Connection timeout"))
+        log.error('Notification-service: connection timed-out')
+
         self.transport.loseConnection()
 
     def lineReceived(self, line):
         """
         Receive line commands from the server.
         """
-        self.resetTimeout()
-        print "Got response:{}".format(line)
+        self.setTimeout(None)
+
+        # Only print if failed response
+        if line != 'OK':
+          log.error("Notification-service: Got failed response: {}".format(line))
 
     def sendLine(self, line):
         """
         Override sendLine method
         """
 
-        if not self._current:
+        # Set timeout if there isn't already one running
+        if not self.timeOut:
            self.setTimeout(self.persistentTimeOut)
 
         if not isinstance(line, str):
@@ -90,7 +101,6 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
                 (type(line),)))
         LineOnlyReceiver.sendLine(self, line)
         cmdObj = Command(line)
-        self._current.append(cmdObj)
         return cmdObj._deferred
 
     def connectionMade(self):
