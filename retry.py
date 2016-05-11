@@ -64,10 +64,7 @@ class RetryDecoratorFactory(object):
             return
 
         if callback is None:
-            if self.callback is None:
-                raise ValueError("no callback to retry")
-            else:
-                callback = self.callback
+            raise ValueError("no callback to retry")
 
         self.retries += 1
         if self.maxRetries is not None and (self.retries > self.maxRetries):
@@ -86,7 +83,7 @@ class RetryDecoratorFactory(object):
 
         def recallback():
             self._callID = None
-            callback.connect()
+            callback(*args, **kwargs)
         if self.clock is None:
             from twisted.internet import reactor
             self.clock = reactor
