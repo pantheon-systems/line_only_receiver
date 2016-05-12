@@ -1,8 +1,11 @@
+import random
+from twisted.python import log
+
 import wrapt
 
-class RetryDecoratorFactory(object):
+class Retry(object):
     """
-    Mixin to Retry an action on a ConnectionPool
+    A decorator factory to create retry decorators, which retry a command on a connection pool
 
     Note that clients should call my resetDelay method after they have
     connected successfully.
@@ -32,14 +35,23 @@ class RetryDecoratorFactory(object):
     # factor if e is too large for your application.)
     jitter = 0.11962656472 # molar Planck constant times c, joule meter/mole
 
+    noisy = True
     delay = initialDelay
     retries = 0
     maxRetries = None
     _callID = None
-    callback = None
     clock = None
+    _wrapped = None
 
-    continueTrying = 1
+    def __init__(self, maxRetries, handled_exceptions):
+        """
+        Creates Retry object
+
+        handled_exceptions is list of exceptions to trigger a Retry
+        """
+
+        self.maxRetries = maxRetries
+        self.handled_exceptions = handled_exceptions
 
     @wrapt.decorator()
     def __call__(self, wrapped, instance, args, kwargs):
@@ -47,31 +59,36 @@ class RetryDecoratorFactory(object):
         This class should NOT be overridden
         """
 
+        #self._wrapped = wrapped.__wrapped__
+
+        print 'wrapped {}'.format(dir(wrapped))
+        print 'instance {}'. format(dir(instance.__class__))
+        print 'self {}'.format(dir(self))
+        self._wrapped = getattr(instance.__class__, wrapped.__name__)
+        print dir(self._wrapped)
+        self._instance = instance
         d = wrapped(*args, **kwargs)
+        print 'defer', d
 
         for _ in xrange(self.maxRetries):
-            d.addErrback(self.retry, wrapped, *args, **kwargs)
+            print 'add retry'
+            d.addErrback(self.retry, *args, **kwargs)
 
         return d
 
-    def retry(self, callback, *args, **kwargs):
+    def retry(self, failure, *args, **kwargs):
         """
-        Have this callback connect again, after a suitable delay.
+        Have this command connect again, after a suitable delay.
         """
-        if not self.continueTrying:
-            if self.noisy:
-                log.msg("Abandoning %s on explicit request" % (callback,))
-            return
 
-        if callback is None:
-            raise ValueError("no callback to retry")
+        # Only retry for hanlded exceptions
+        t = failure.trap(*self.handled_exceptions)
+
+        if t not in self.handled_exceptions:
+            print 'not trapped', failure
+            return failure
 
         self.retries += 1
-        if self.maxRetries is not None and (self.retries > self.maxRetries):
-            if self.noisy:
-                log.msg("Abandoning %s after %d retries." %
-                        (callback, self.retries))
-            return
 
         self.delay = min(self.delay * self.factor, self.maxDelay)
         if self.jitter:
@@ -79,54 +96,20 @@ class RetryDecoratorFactory(object):
                                               self.delay * self.jitter)
 
         if self.noisy:
-            log.msg("%s will retry in %d seconds" % (callback, self.delay,))
+            print("Running command {} in {} seconds. Retry {}/{}".format(
+                self._wrapped,
+                self.delay,
+                self.retries,
+                self.maxRetries)
+            )
 
-        def recallback():
+        def recommand():
             self._callID = None
-            callback(*args, **kwargs)
+            return self._wrapped(self._instance, *args, **kwargs)
+
         if self.clock is None:
             from twisted.internet import reactor
             self.clock = reactor
-        self._callID = self.clock.callLater(self.delay, recallback)
+        self._callID = self.clock.callLater(self.delay, recommand)
 
-
-    def stopTrying(self):
-        """
-        Put a stop to any attempt to reconnect in progress.
-        """
-        # ??? Is this function really stopFactory?
-        if self._callID:
-            self._callID.cancel()
-            self._callID = None
-        self.continueTrying = 0
-        if self.callback:
-            try:
-                self.callback.stopConnecting()
-            except error.NotConnectingError:
-                pass
-
-
-    def resetDelay(self):
-        """
-        Call this method after a successful connection: it resets the delay and
-        the retry counter.
-        """
-        self.delay = self.initialDelay
-        self.retries = 0
-        self._callID = None
-        self.continueTrying = 1
-
-
-    def __getstate__(self):
-        """
-        Remove all of the state which is mutated by connection attempts and
-        failures, returning just the state which describes how reconnections
-        should be attempted.  This will make the unserialized instance
-        behave just as this one did when it was first instantiated.
-        """
-        state = self.__dict__.copy()
-        for key in ['callback', 'retries', 'delay',
-                    'continueTrying', '_callID', 'clock']:
-            if key in state:
-                del state[key]
-        return state
+        return self._callID
