@@ -5,9 +5,8 @@ from twisted.trial import unittest
 from twisted.internet import defer
 from twisted.internet import task
 
-from tx_tcp_line_client import retry
-
-class TestError(Exception): pass
+from tx_tcp_line_client.utils import retry
+from tx_tcp_line_client.exceptions import TimeoutError
 
 MAX_RETRIES = 7
 
@@ -18,8 +17,8 @@ class RetryTestCase(unittest.TestCase):
             if self.counter >= succeed_after:
                 return defer.succeed('I PASSED')
             self.counter +=1
-            return defer.fail(TestError())
-        self.decorator = retry.Retry(MAX_RETRIES, (TestError,))
+            return defer.fail(TimeoutError())
+        self.decorator = retry.Retry(MAX_RETRIES, (TimeoutError,))
         self.decorator.clock = task.Clock()
         self.decorated_func = self.decorator(test_function)
         self.undecorated_func = test_function
