@@ -37,9 +37,26 @@ def _succeed_after_test_case_factory(succeed_after):
         d.addCallback(self.assertEqual, 'I PASSED')
     return test_success_case
 
+def _fail_after_test_case_factory(succeed_after):
+    def test_fail_case(self):
+        d = self.decorated_func(succeed_after)
+        for i in xrange(succeed_after):
+            self.decorator.clock.advance(3600)
+        self.assertFailure(d, TimeoutError)
+    return test_fail_case
+
 for succeed_after in xrange(MAX_RETRIES+1):
     setattr(
         RetryTestCase,
         'test_retry_succeed_on_attempt_{}'.format(succeed_after),
         _succeed_after_test_case_factory(succeed_after)
     )
+
+for succeed_after in xrange(MAX_RETRIES+1, MAX_RETRIES+2):
+    attempt_failures = succeed_after - 1
+    setattr(
+        RetryTestCase,
+        'test_retry_fail_with_{}_attempt_failures'.format(attempt_failures),
+        _fail_after_test_case_factory(succeed_after)
+    )
+
