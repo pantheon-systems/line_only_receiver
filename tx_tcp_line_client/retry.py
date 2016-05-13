@@ -38,7 +38,8 @@ class Retry(object):
 
         maxDelay: Maximum number of seconds between connection attempts.
         handled_exceptions: A list of exceptions that will trigger a retry if
-            thrown.
+        thrown. This SHOULD not handle built-in exceptions as doing so will
+        lead to un-intended retries.
         initialDelay: Delay for the first reconnection attempt.
         maxRetries: Maximum number of consecutive unsuccessful connection
             attempts, after which no further connection attempts will be made. If
@@ -66,39 +67,39 @@ class Retry(object):
         d.addErrback(self.retry, 1, delay, *args, **kwargs)
         return d
 
-    def retry(self, failure, retry, delay, *args, **kwargs):
+    def retry(self, failure, iteration, delay, *args, **kwargs):
         """
         Have this command connect again, after a suitable delay.
         """
 
-        # Only retry for hanlded exceptions
+        # Trap hanlded exceptions
         t = failure.trap(*self.handled_exceptions)
 
         if t not in self.handled_exceptions:
+            # Short circuit when the failure is not handled.
             return failure
 
         if self.noisy:
-            print("Retrying function {} in {} seconds {}/{}".format(
+            log.msg("Retrying function {} in {} seconds {}/{}".format(
                 self._wrapped,
                 delay,
-                retry,
+                iteration,
                 self.maxRetries)
             )
 
         if self.clock is None:
-            # This is necessary to allow testing by overwriting the clock
             from twisted.internet import reactor
             self.clock = reactor
         _new_attempt = task.deferLater(self.clock, delay, self._wrapped, *args, **kwargs)
 
-        if retry < self.maxRetries:
+        if iteration < self.maxRetries:
             delay = min(delay * self.factor, self.maxDelay)
             if self.jitter:
                 delay = random.normalvariate(
                     delay,
                     delay * self.jitter
                 )
-            _new_attempt.addErrback(self.retry, retry+1, delay, *args, **kwargs)
+            _new_attempt.addErrback(self.retry, iteration+1, delay, *args, **kwargs)
 
         return _new_attempt
 

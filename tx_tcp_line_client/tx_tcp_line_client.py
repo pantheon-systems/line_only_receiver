@@ -1,6 +1,5 @@
 from collections import deque
 
-from twisted.python import log
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.protocols.policies import TimeoutMixin
 from twisted.internet.defer import Deferred, fail, TimeoutError
@@ -16,6 +15,7 @@ class ResponseError(Exception):
     """
     Error caused by a bad response
     """
+
 
 class Command(object):
     """
@@ -51,6 +51,7 @@ class Command(object):
         """
         self._deferred.errback(error)
 
+
 class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
     """
     A LineOnlyReceiver that will notify a connectionPool that it is ready
@@ -61,30 +62,78 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
     def __init__(self, timeOut=60):
         """
         Create the protocol.
+        @ivar _current: current list of requests waiting for an answer from the
+            server.
+        @type _current: C{deque} of L{Command}
+
         @param timeOut: the timeout to wait before detecting that the
             connection is dead and close it. It's expressed in seconds.
         @type timeOut: C{int}
         """
+        self._queue = deque()
         self.persistentTimeOut = timeOut
         self.timeOut = None
+
+    def _cancelCommands(self, reason):
+        """
+        Cancel all the outstanding commands, making them fail with C{reason}.
+        """
+        while self._queue:
+            cmd = self._queue.popleft()
+            cmd.fail(reason)
 
     def timeoutConnection(self):
         """
         Close the connection in case of timeout.
         """
-        log.error('Notification-service: connection timed-out')
-
+        self._cancelCommands(TimeoutError("Connection timeout"))
         self.transport.loseConnection()
+
+    def connectionLost(self, reason):
+        """
+        Cause any outstanding commands to fail.
+        """
+        self._disconnected = True
+        self._cancelCommands(reason)
+        LineReceiver.connectionLost(self, reason)
+
+    def cmd_OK(self):
+        """
+        The last command has been completed.
+        """
+        self._queue.popleft().success(True)
+
+    def cmd_UNKNOWN(self, reason):
+        self._queue.popleft().fail(reason)
 
     def lineReceived(self, line):
         """
         Receive line commands from the server.
         """
-        self.setTimeout(None)
+        self.resetTimeout()
+        token = line.split(" ", 1)[0]
+        # First manage standard commands without space
+        cmd = getattr(self, "cmd_%s" % (token,), None)
+        if cmd is not None:
+            args = line.split(" ", 1)[1:]
+            if args:
+                cmd(args[0])
+            else:
+                cmd()
+        else:
+            # Then manage commands with space in it
+            line = line.replace(" ", "_")
+            cmd = getattr(self, "cmd_%s" % (line,), None)
+            if cmd is not None:
+                cmd()
+            else:
+                # Increment/Decrement response
+                cmd = self._queue.popleft()
+                cmd_UNKNOWN("Unknown response received: {0}".format(val))
 
-        # Only print if failed response
-        if line != 'OK':
-          log.error("Notification-service: Got failed response: {}".format(line))
+        if not self._queue:
+            # No pending request, remove timeout
+            self.setTimeout(None)
 
     def sendLine(self, line):
         """
@@ -92,7 +141,7 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
         """
 
         # Set timeout if there isn't already one running
-        if not self.timeOut:
+        if not self._queue:
            self.setTimeout(self.persistentTimeOut)
 
         if not isinstance(line, str):
@@ -101,6 +150,7 @@ class _PooledLineOnlyReceiver(LineOnlyReceiver, TimeoutMixin):
                 (type(line),)))
         LineOnlyReceiver.sendLine(self, line)
         cmdObj = Command(line)
+        self._queue.append(cmdObj)
         return cmdObj._deferred
 
     def connectionMade(self):
@@ -132,9 +182,9 @@ class LineOnlyReceiverPool(Pool):
         from txconnpool.line_receiver import LineOnlyReceiverPool
 
         addr = IPv4Address('TCP', '127.0.0.1', 11211)
-        mc_pool = LineOnlyReceiverPool(addr, maxClients=20)
+        pool = LineOnlyReceiverPool(addr, maxClients=20)
 
-        d = mc_pool.get('cached-data')
+        d = pool.sendLine('cached-data')
 
         def gotCachedData(data):
             flags, value = data
