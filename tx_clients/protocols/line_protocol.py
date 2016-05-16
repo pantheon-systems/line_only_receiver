@@ -4,8 +4,8 @@ from twisted.protocols.basic import LineOnlyReceiver
 from twisted.protocols.policies import TimeoutMixin
 from twisted.internet.defer import fail
 
-from tx_tcp_line_client.utils.command import Command
-from tx_tcp_line_client.exceptions import (
+from tx_clients.utils.command import Command
+from tx_clients.exceptions import (
     TimeoutError,
     ResponseError,
     ClientError

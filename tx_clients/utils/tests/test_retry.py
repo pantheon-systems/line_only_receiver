@@ -5,8 +5,8 @@ from twisted.trial import unittest
 from twisted.internet import defer
 from twisted.internet import task
 
-from tx_tcp_line_client.utils import retry
-from tx_tcp_line_client.exceptions import TimeoutError
+from tx_clients.utils import retry
+from tx_clients.exceptions import TimeoutError
 
 MAX_RETRIES = 7
 

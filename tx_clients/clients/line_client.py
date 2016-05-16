@@ -1,8 +1,8 @@
 from txconnpool.pool import PooledClientFactory, Pool
 
-from tx_tcp_line_client.protocols import LineProtocol
-from tx_tcp_line_client.utils import Retry
-from tx_tcp_line_client.exceptions import TimeoutError
+from tx_clients.protocols import LineProtocol
+from tx_clients.utils import Retry
+from tx_clients.exceptions import TimeoutError
 
 
 class PooledLineProtocol(LineProtocol):
