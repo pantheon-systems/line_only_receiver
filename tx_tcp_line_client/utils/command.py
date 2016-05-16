@@ -19,7 +19,7 @@ class Command(object):
         """
         self.command = command
         self.value = value
-        self._deferred = Deferred()
+        self._deferred = defer.Deferred()
 
     def success(self, response):
         """

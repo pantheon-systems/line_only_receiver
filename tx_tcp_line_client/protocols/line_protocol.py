@@ -11,7 +11,6 @@ from tx_tcp_line_client.exceptions import (
     ClientError
 )
 
-
 class LineProtocol(LineOnlyReceiver, TimeoutMixin):
     """
     _disconnected: indicate if the connectionLost has been called or not.
@@ -19,7 +18,7 @@ class LineProtocol(LineOnlyReceiver, TimeoutMixin):
     _disconnected = False
     factory = None
 
-    def __init__(self, timeOut=60):
+    def __init__(self, timeOut=5):
         """
         Create the protocol.
 
@@ -98,7 +97,7 @@ class LineProtocol(LineOnlyReceiver, TimeoutMixin):
                 )
             )
 
-        if not cmdObj._deffered.called:
+        if not cmdObj._deferred.called:
             LineOnlyReceiver.sendLine(self, line)
             self._queue.append(cmdObj)
 
