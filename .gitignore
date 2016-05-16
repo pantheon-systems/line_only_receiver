@@ -1,2 +1,9 @@
 line_only_receiver.egg-info
 *.pyc
+build/
+src/
+pip-log.txt
+*DS_Store
+*~
+dist/
+**/_trial_temp
