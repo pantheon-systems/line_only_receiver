@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tx_clients',
-    version='0.1.2',
+    version='0.1.3',
     url="https://github.com/pantheon-systems/tx_clients@master",
     description='Twistd Clients and Connection Pools',
     long_description='',

@@ -52,7 +52,7 @@ class LineClientPool(Pool):
     """
     clientFactory = PooledLineClientFactory
 
-    @Retry(1, (TimeoutError,), maxDelay=3)
+    @Retry(3, (TimeoutError,), maxDelay=3)
     def send(self, data):
         """
         See L{twisted.protocols.basic.LineOnlyReceiver.get}.
