@@ -44,7 +44,7 @@ class LineClientPool(Pool):
         def responseHandler(response):
             print 'Yay, we got a response', response
 
-        def failureHandleri(failure):
+        def failureHandler(failure):
             print 'Something bad happend', failure
 
 

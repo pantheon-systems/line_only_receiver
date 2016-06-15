@@ -1,4 +1,4 @@
-line_only_receiver.egg-info
+*.egg-info
 *.pyc
 build/
 src/
