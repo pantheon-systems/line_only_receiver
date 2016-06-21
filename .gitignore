@@ -1,7 +1,6 @@
 *.egg-info
 *.pyc
 build/
-src/
 pip-log.txt
 *DS_Store
 *~

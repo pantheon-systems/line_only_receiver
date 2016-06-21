@@ -1,0 +1,39 @@
+package:
+  name: tx_clients
+  version: "0.1.3"
+
+source:
+  path: ..
+
+build:
+  number: 9
+  script: python setup.py install
+
+requirements:
+  build:
+    - python ==2.7.10
+    - setuptools
+    - twisted ==12.3.0
+    - txconnpool ==0.1.1
+    - wrapt >=1.6.0
+
+  run:
+    - python ==2.7.10
+    - twisted ==12.3.0
+    - txconnpool ==0.1.1
+    - wrapt >=1.6.0
+
+test:
+  files:
+    - ../Makefile
+    - ../.pylintrc
+  imports:
+    - tx_clients
+  requires:
+    - pylint >=1.5.4
+  commands:
+    - make test
+    - make lint
+
+about:
+  home: https://github.com/pantheon-systems/tx_clients

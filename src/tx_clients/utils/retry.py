@@ -80,11 +80,13 @@ class Retry(object):
             return failure
 
         if self.noisy:
-            log.msg("Retrying function {} in {} seconds {}/{}".format(
-                self._wrapped,
-                delay,
-                iteration,
-                self.maxRetries)
+            log.msg(
+                "Retrying function {} in {} seconds {}/{}".format(
+                    self._wrapped,
+                    delay,
+                    iteration,
+                    self.maxRetries
+                )
             )
 
         if self.clock is None:

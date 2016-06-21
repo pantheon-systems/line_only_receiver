@@ -1,6 +1,3 @@
-import random
-import time
-
 from twisted.trial import unittest
 from twisted.internet import defer
 from twisted.internet import task
@@ -16,7 +13,7 @@ class RetryTestCase(unittest.TestCase):
         def test_function(succeed_after=None):
             if self.counter >= succeed_after:
                 return defer.succeed('I PASSED')
-            self.counter +=1
+            self.counter += 1
             return defer.fail(TimeoutError())
         self.decorator = retry.Retry(MAX_RETRIES, (TimeoutError,))
         self.decorator.clock = task.Clock()
@@ -32,7 +29,7 @@ class RetryTestCase(unittest.TestCase):
 def _succeed_after_test_case_factory(succeed_after):
     def test_success_case(self):
         d = self.decorated_func(succeed_after)
-        for i in xrange(succeed_after):
+        for _ in xrange(succeed_after):
             self.decorator.clock.advance(3600)
         d.addCallback(self.assertEqual, 'I PASSED')
     return test_success_case
@@ -40,7 +37,7 @@ def _succeed_after_test_case_factory(succeed_after):
 def _fail_after_test_case_factory(succeed_after):
     def test_fail_case(self):
         d = self.decorated_func(succeed_after)
-        for i in xrange(succeed_after):
+        for _ in xrange(succeed_after):
             self.decorator.clock.advance(3600)
         self.assertFailure(d, TimeoutError)
     return test_fail_case

@@ -1,8 +1,9 @@
+#pylint: disable=protected-access
 from collections import deque
 
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.protocols.policies import TimeoutMixin
-from twisted.internet.defer import fail
+from twisted.internet import protocol
 
 from tx_clients.utils.command import Command
 from tx_clients.exceptions import (
@@ -47,7 +48,7 @@ class LineProtocol(LineOnlyReceiver, TimeoutMixin):
         self._cancelCommands(TimeoutError("Connection timeout"))
         self.transport.loseConnection()
 
-    def connectionLost(self, reason):
+    def connectionLost(self, reason=protocol.connectionDone):
         """
         Cause any outstanding commands to fail.
         """
@@ -66,7 +67,7 @@ class LineProtocol(LineOnlyReceiver, TimeoutMixin):
         else:
             self._queue.popleft().fail(
                 ResponseError(
-                    "Unknown response received: {0}".format(val)
+                    "Unknown response received: {0}".format(line)
                 )
             )
 
@@ -80,7 +81,7 @@ class LineProtocol(LineOnlyReceiver, TimeoutMixin):
         """
         # Set timeout if there isn't already one running
         if not self._queue:
-           self.setTimeout(self._timeOut)
+            self.setTimeout(self._timeOut)
 
         cmdObj = Command('sendLine', line)
         if self._disconnected:
