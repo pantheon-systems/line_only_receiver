@@ -16,7 +16,10 @@ build: ## Build from the conda recipe.
 	conda build recipe
 
 test: ## Run trial unittest runner against app. Must be installed or in develop mode. Requires Twisted
-	trial $(APP)
+	coverage run --source $(APP) `which trial` $(APP)
+
+coverage: ## Display the coverage report. Requires that make test has been run.
+	coverage report
 
 lint: ## Run pylint against the app. Must be installed or in develop mode. Requires pylint
 	pylint $(APP)
@@ -26,4 +29,4 @@ help: ## print list of tasks and descriptions
 
 .DEFAULT_GOAL := help
 
-.PHONY := develop undevelop install uninstall build test lint help
+.PHONY := develop undevelop install uninstall build test coverage lint help

@@ -30,7 +30,8 @@ test:
   imports:
     - tx_clients
   requires:
-    - pylint >=1.5.4
+    - pylint
+    - coverage
   commands:
     - make test
     - make lint
