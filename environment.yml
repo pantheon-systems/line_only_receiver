@@ -9,3 +9,5 @@ dependencies:
     - pylint
     - coverage
     - wrapt
+    - pip:
+        - bumpversion
