@@ -3,6 +3,7 @@ package:
   version: "0.1.3" # Managed by bumpversion. Do not modify.
 
 source:
+  git_rev: {{ environ.get('CIRCLE_BRANCH', '') }}
   git_url: ..
 
 build:
@@ -35,6 +36,7 @@ test:
   commands:
     - make test
     - make lint
+    - make coverage
 
 about:
   home: 'https://github.com/pantheon-systems/tx_clients'

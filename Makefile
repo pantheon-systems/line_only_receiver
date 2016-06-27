@@ -19,10 +19,10 @@ undevelop: ## Disable setup.py develop mode
 	python setup.py develop --uninstall
 
 install: ## Install the latest local build of our app to the default environment. Requires building the app.
-	conda install $(APP) --use-local
+	conda install -y $(APP) --use-local
 
 uninstall: ## Uninstall the latest build of our app from the default environment
-	conda uninstall $(APP)
+	conda uninstall -y $(APP)
 
 build: ## Build from the conda recipe.
 	conda build recipe

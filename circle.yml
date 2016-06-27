@@ -1,14 +1,24 @@
 machine:
   python:
     version: 2.7.10
+  pre:
+    - test -d $HOME/miniconda || wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O ~/miniconda.sh
+    - test -d $HOME/miniconda || bash ~/miniconda.sh -b -p $HOME/miniconda
+  environment:
+    PATH: "$HOME/miniconda/bin:$PATH"
 
 dependencies:
-  pre:
-    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh ~/miniconda.sh
-    - bash ~/miniconda.sh -b -p $HOME/miniconda
-    - export PATH="$HOME/miniconda/bin:$PATH"
+  override:
+    - conda update -y conda
+    - conda install -y conda-build
+    - conda config --add channels getpantheon
+    - conda clean -y --all
+    - pip install coveralls
+  cache_directories:
+    - ~/miniconda
 
 test:
   override:
-    - env
     - make build
+    - make install
+    - coveralls
