@@ -1,3 +1,4 @@
+#pylint: disable=unused-import
 from twisted.internet.defer import TimeoutError
 
 class ClientError(Exception):

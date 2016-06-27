@@ -1,20 +1,23 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+
+__version__ = "0.1.3" # Managed by bumpversion. Do not modify.
 
 setup(
     name='tx_clients',
-    version='0.1.3',
-    url="https://github.com/pantheon-systems/tx_clients@master",
-    description='Twistd Clients and Connection Pools',
+    version=__version__,
+    url="https://github.com/pantheon-systems/tx_clients",
+    description='Twisted Clients and Connection Pools',
     long_description='',
-    author='Michael Liu',
-    author_email='michael.liu@getpantheon.com',
+    author='Ray Thompson',
+    author_email='ray@getpantheon.com',
     license='BSD',
-    keywords='Twistd client protocol pool'.split(),
-    platforms='any',
-    include_package_data=False,
-    #test_suite='test_dashvisor.run_tests.run_all',
+    keywords='Twisted client protocol pool'.split(),
+    packages=find_packages('src'),
+    package_dir = {'':'src'},
+    zip_safe=False, # pylint and coverage have trouble traversing zipped eggs
     install_requires=[
-        "txconnpool>=0.1.1",
-        "Twisted>=12.2.0"
+        "txconnpool>=0.1",
+        "Twisted==12.3.0",
+        "wrapt>=1.6.0"
     ],
 )

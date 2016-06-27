@@ -1,0 +1,13 @@
+
+name: tx_clients
+channels:
+    - getpantheon
+dependencies:
+    - python ==2.7.10
+    - Twisted ==12.3.0
+    - txconnpool >=0.1.1
+    - pylint
+    - coverage
+    - wrapt
+    - pip:
+        - bumpversion
