@@ -1,25 +1,31 @@
 machine:
   python:
     version: 2.7.10
+  post:
+    - test -d $HOME/miniconda || wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O ~/miniconda.sh
+    - test -d $HOME/miniconda || bash ~/miniconda.sh -b -p $HOME/miniconda
+  environment:
+    PATH: "$HOME/miniconda/bin:$PATH"
 
 dependencies:
-  pre:
-    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh ~/miniconda.sh
-    - bash ~/miniconda.sh -b -p $HOME/miniconda
-    - export PATH="$HOME/miniconda/bin:$PATH"
-    - conda update conda
-    - conda install conda-build
-    - conda config --set anaconda_upload yes
+  override:
+    - conda update -y conda
+    - conda install -y conda-build
+    - conda install -y anaconda-client
     - conda config --add channels $ANACONDA_CLOUD_CHANNEL
+    - conda config --set anaconda_upload yes
+    - pip install coveralls
+    - pip install bumpversion
+  cache_directories:
+    - ~/miniconda
 
 test:
   override:
-    - cd $CIRCLE_PROJECT_REPONAME
-    - conda env create
-    - source activate $CIRCLE_PROJECT_REPONAME
-    - make build
-    - make install
-    - make test
-    - make lint
-    - make coverage
+    - git config `git show -s --format="user.name \"%an\""`
+    - git config `git show -s --format="user.email \"%ae\""`
+    - make bumpminor
+    - conda build --user $ANACONDA_CLOUD_USER --token $ANACONDA_CLOUD_TOKEN recipe
+    - git push origin $CIRCLE_BRANCH
+    - git push --tags
+    - mv $HOME/miniconda/conda-bld/test-tmp_dir/.coverage .
     - coveralls
