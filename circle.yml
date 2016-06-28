@@ -9,7 +9,8 @@ dependencies:
     - export PATH="$HOME/miniconda/bin:$PATH"
     - conda update conda
     - conda install conda-build
-    - conda config --add channels getpantheon
+    - conda config --set anaconda_upload yes
+    - conda config --add channels $ANACONDA_CLOUD_CHANNEL
 
 test:
   override:
