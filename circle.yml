@@ -33,9 +33,4 @@ deployment:
   release:
     branch: master
     commands:
-      - git config `git show -s --format="user.name \"%an\""`
-      - git config `git show -s --format="user.email \"%ae\""`
-      - make bumpminor
       - conda build -q --user $ANACONDA_CLOUD_USER --token $ANACONDA_CLOUD_TOKEN recipe
-      - git push origin master
-      - git push --tags
