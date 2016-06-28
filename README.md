@@ -1,11 +1,4 @@
 ###tx_tcp_line_client
+[![Coverage Status](https://coveralls.io/repos/github/pantheon-systems/tx_clients/badge.svg)](https://coveralls.io/github/pantheon-systems/tx_clients)
 
-This is a line_only_client that writes to a TCP socket with the following specs (unchecked means TODO):
-
-- [x] writes messages delimited by '\r\n' and waits for response
-- [x] uses a connection pool
-- [x] connection retry
-- [x] times out waiting for response and closes connection
-- [ ] logs timeout and message request failure exceptions
-- [ ] handles OK/fail response
-- [ ] retries after timeout with exponential backoff
+This is a library of twisted helpers.

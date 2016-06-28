@@ -1,7 +1,7 @@
 machine:
   python:
     version: 2.7.10
-  pre:
+  post:
     - test -d $HOME/miniconda || wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O ~/miniconda.sh
     - test -d $HOME/miniconda || bash ~/miniconda.sh -b -p $HOME/miniconda
   environment:
@@ -11,13 +11,31 @@ dependencies:
   override:
     - conda update -y conda
     - conda install -y conda-build
-    - conda config --add channels getpantheon
-    - conda clean -y --all
+    - conda install -y anaconda-client
+    - conda config --add channels $ANACONDA_CLOUD_CHANNEL
+    - conda config --set anaconda_upload yes
     - pip install coveralls
+    - pip install bumpversion
   cache_directories:
     - ~/miniconda
 
 test:
   override:
-    - make build
+    - conda build --check recipe
+    - conda build -b recipe
+    - conda build -p recipe
+    - conda build -t recipe --no-anaconda-upload
+    - mv $HOME/miniconda/conda-bld/test-tmp_dir/.coverage .
+    - cp .coverage $CIRCLE_ARTIFACTS
     - coveralls
+
+deployment:
+  release:
+    branch: master
+    commands:
+      - git config `git show -s --format="user.name \"%an\""`
+      - git config `git show -s --format="user.email \"%ae\""`
+      - make bumpminor
+      - conda build -q --user $ANACONDA_CLOUD_USER --token $ANACONDA_CLOUD_TOKEN recipe
+      - git push origin master
+      - git push --tags
