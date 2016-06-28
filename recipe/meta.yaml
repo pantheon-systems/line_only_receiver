@@ -1,6 +1,6 @@
 package:
   name: "tx_clients"
-  version: "0.1.4" # Managed by bumpversion. Do not modify.
+  version: "0.1.5" # Managed by bumpversion. Do not modify.
 
 source:
   git_rev: {{ environ.get('CIRCLE_BRANCH', '') }}
