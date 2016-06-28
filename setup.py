@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "0.1.3" # Managed by bumpversion. Do not modify.
+__version__ = "0.1.4" # Managed by bumpversion. Do not modify.
 
 setup(
     name='tx_clients',
