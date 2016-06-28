@@ -28,6 +28,7 @@ test:
   files:
     - ../Makefile
     - ../.pylintrc
+    - ../.coveragerc
   imports:
     - tx_clients
   requires:

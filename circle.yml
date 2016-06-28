@@ -20,5 +20,4 @@ dependencies:
 test:
   override:
     - make build
-    - make install
     - coveralls
