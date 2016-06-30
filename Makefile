@@ -1,5 +1,5 @@
 APP := "tx_clients"
-VERSION := "0.1.4" # Managed by bumpversion. Do not modify.
+VERSION := "0.2.0" # Managed by bumpversion. Do not modify.
 
 bumpmicro: ## Bump the micro (patch) version of the package. Auto generates a tag and a commit.
 	bumpversion patch

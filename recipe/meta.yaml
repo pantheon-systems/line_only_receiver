@@ -1,6 +1,6 @@
 package:
   name: "tx_clients"
-  version: "0.1.4" # Managed by bumpversion. Do not modify.
+  version: "0.2.0" # Managed by bumpversion. Do not modify.
 
 source:
   git_rev: {{ environ.get('CIRCLE_BRANCH', '') }}
@@ -34,6 +34,7 @@ test:
   requires:
     - pylint
     - coverage
+    - mock
   commands:
     - make test
     - make lint
