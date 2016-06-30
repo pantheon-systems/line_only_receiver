@@ -63,6 +63,9 @@ __BasicJSONAgent__
     d = agent.post(url, data=data)
     # The content-type will also be set automatically.
 
+__BasicResponse__
+
+All BasicAgent's return a BasicResponse object. The BasicResponse object will automatically wait for the body of the response. This again is a simplification of the response object returned by a Twisted Agent [twisted.web.iweb.IResponse][]. A twisted response object does not automatically fetch the body. This is absolutely necessary for advanced use cases but not for the basic interface were creating. The body is attached to the basic response object by default. Some status codes (204, 304) and http verbs (HEAD) MUST not have a body. In these cases the body is never read from the transport and MUST be None.
 
 ### Agent Invocation
 Agents can be invoked both synchronously and asynchronously.
@@ -137,6 +140,7 @@ to adhere to the semantics of the notification-service (google pub/sub proxy) si
 The line client has a dependency upon txconnpool which is an older implementation of connection pooling.
 
 
+[twisted.web.iweb.IResponse]: https://github.com/twisted/twisted/blob/twisted-12.2.0/twisted/web/iweb.py#L466
 [twisted.web.client.Agent]: https://github.com/twisted/twisted/blob/twisted-12.2.0/twisted/web/client.py#L1096
 [twisted.web.client.ProxyAgent]: https://github.com/twisted/twisted/blob/twisted-12.2.0/twisted/web/client.py#L1211
 [twisted.web.client.CookieAgent]: https://github.com/twisted/twisted/blob/twisted-12.2.0/twisted/web/client.py#L1325
