@@ -1,5 +1,6 @@
 from twisted.internet import defer
 
+
 class Command(object):
     """
     Wrap a client action into an object, that holds the values used by the
@@ -27,7 +28,6 @@ class Command(object):
         """
 
         self._deferred.callback(response)
-
 
     def fail(self, failure):
         """

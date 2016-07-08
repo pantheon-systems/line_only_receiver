@@ -4,6 +4,7 @@ import wrapt
 from twisted.python import log
 from twisted.internet import task
 
+
 class Retry(object):
     """
     A class decorator to retry a command on a connection pool. Retry attempts
@@ -23,10 +24,10 @@ class Retry(object):
     # the National Institute of Science and Technology.  Take extreme care
     # in altering them, or you may damage your Internet!
     # (Seriously: <http://physics.nist.gov/cuu/Constants/index.html>)
-    factor = 2.7182818284590451 # (math.e)
+    factor = 2.7182818284590451  # (math.e)
     # Phi = 1.6180339887498948 # (Phi is acceptable for use as a
     # factor if e is too large for your application.)
-    jitter = 0.11962656472 # molar Planck constant times c, joule meter/mole
+    jitter = 0.11962656472  # molar Planck constant times c, joule meter/mole
 
     noisy = True
     clock = None
@@ -101,7 +102,7 @@ class Retry(object):
                     delay,
                     delay * self.jitter
                 )
-            _new_attempt.addErrback(self.retry, iteration+1, delay, *args, **kwargs)
+            _new_attempt.addErrback(self.retry, iteration + 1, delay, *args, **kwargs)
 
         return _new_attempt
 

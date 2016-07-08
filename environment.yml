@@ -9,5 +9,7 @@ dependencies:
     - pylint
     - coverage
     - wrapt
+    - flake8
+    - mock
     - pip:
         - bumpversion
