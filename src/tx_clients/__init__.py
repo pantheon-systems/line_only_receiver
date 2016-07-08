@@ -1,1 +1,1 @@
-__version__ = "0.2.0" # Managed by bumpversion. Do not modify.
+__version__ = "0.2.1"  # Managed by bumpversion. Do not modify.
