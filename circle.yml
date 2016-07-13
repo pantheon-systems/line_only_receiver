@@ -35,4 +35,4 @@ deployment:
   release:
     branch: master
     commands:
-      - conda build -q --user $ANACONDA_CLOUD_ORGANIZATION --token $ANACONDA_CLOUD_DEPLOY_TOKEN
+      - conda build -q --user $ANACONDA_CLOUD_ORGANIZATION --token $ANACONDA_CLOUD_DEPLOY_TOKEN recipe
