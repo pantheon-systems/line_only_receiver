@@ -15,16 +15,18 @@ dependencies:
     - conda config --add channels $ANACONDA_CLOUD_CHANNEL
     - conda config --set anaconda_upload yes
     - pip install coveralls
+    - pip install flake8
     - pip install bumpversion
   cache_directories:
     - ~/miniconda
 
 test:
   override:
+    - make flake8
     - conda build --check recipe
-    - conda build -b recipe
-    - conda build -p recipe
-    - conda build -t recipe --no-anaconda-upload
+    - conda build --build-only recipe
+    - conda build --post recipe
+    - conda build --test recipe --no-anaconda-upload
     - mv $HOME/miniconda/conda-bld/test-tmp_dir/.coverage .
     - cp .coverage $CIRCLE_ARTIFACTS
     - coveralls
@@ -33,4 +35,4 @@ deployment:
   release:
     branch: master
     commands:
-      - conda build -q --user $ANACONDA_CLOUD_USER --token $ANACONDA_CLOUD_TOKEN recipe
+      - conda build -q --user $ANACONDA_CLOUD_ORGANIZATION --token $ANACONDA_CLOUD_DEPLOY_TOKEN

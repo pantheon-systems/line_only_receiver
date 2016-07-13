@@ -1,4 +1,4 @@
-#pylint: disable=protected-access, too-many-arguments, too-many-instance-attributes
+# pylint: disable=protected-access, too-many-arguments, too-many-instance-attributes
 from collections import OrderedDict
 
 from zope.interface import implements
@@ -16,9 +16,12 @@ from tx_clients.utils.web import (
     StringBodyProducer
 )
 
+
 # A dictionary is insufficient for supplying headers since a header may be
 # sent multiple times. Dont be lazy, Create a Headers object whenever possible
-dict_to_raw_headers = lambda h: Headers({k: [v] for k, v in h.viewitems()})
+def dict_to_raw_headers(dict_headers):
+    return Headers({k: [v] for k, v in dict_headers.viewitems()})
+
 
 class BasicResponse(object):
     """ Return's a deferred that fires when the body is received
@@ -32,6 +35,8 @@ class BasicResponse(object):
         d = agent.request('GET', 'https://google.com')
         d.addCallback(readBody)
     """
+    implements(IResponse)
+
     def __init__(self):
         """ BasicResponse objects wrap twisted.web.client.iweb.IResponse """
         self._response = None
@@ -43,7 +48,6 @@ class BasicResponse(object):
         self.length = None
         self.body = None
 
-    implements(IResponse)
     def __call__(self, response, method):
         """
         response See: twisted.web.client.iweb.IResponse
@@ -108,6 +112,7 @@ class BasicAgent(client.Agent):
         return d
     """
     bodyProducer = StringBodyProducer
+
     def request(self, method, uri, headers=None, data=None):
         """ Returns an imutable Response object when the body is availabele """
         producer = None
@@ -155,6 +160,7 @@ class BasicFileAgent(BasicAgent):
     """
     bodyProducer = client.FileBodyProducer
 
+
 class BasicJSONAgent(BasicAgent):
     """
     See: BasicHTTPClient
@@ -164,6 +170,7 @@ class BasicJSONAgent(BasicAgent):
     - Automatically sets transfer encoding to chunked
     """
     bodyProducer = JSONBodyProducer
+
     def request(self, method, uri, headers=None, data=None):
         if data is not None:
             if headers is None:
@@ -218,7 +225,7 @@ def stub_agent_factory(agent_cls):
                     args, kwargs = self.request_history[stub_response]
                     try:
                         live_response = yield live_agent.request(*args, **kwargs)
-                    except Exception as e: #pylint: disable=broad-except
+                    except Exception as e:  # pylint: disable=broad-except
                         live_response = e
                     self.live_request_history[stub_response] = ((args, kwargs), live_response)
             yield defer.succeed(None)

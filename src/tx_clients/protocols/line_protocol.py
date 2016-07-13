@@ -1,4 +1,4 @@
-#pylint: disable=protected-access
+# pylint: disable=protected-access
 from collections import deque
 
 from twisted.protocols.basic import LineOnlyReceiver
@@ -11,6 +11,7 @@ from tx_clients.exceptions import (
     ResponseError,
     ClientError
 )
+
 
 class LineProtocol(LineOnlyReceiver, TimeoutMixin):
     """

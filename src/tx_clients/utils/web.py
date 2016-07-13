@@ -1,3 +1,5 @@
+# pylint: disable=unused-argument
+
 import base64
 import cStringIO
 import json
@@ -74,13 +76,11 @@ class _ReadBodyProtocol(protocol.Protocol):
         self.message = message
         self.dataBuffer = []
 
-
     def dataReceived(self, data):
         """
         Accumulate some more bytes from the response.
         """
         self.dataBuffer.append(data)
-
 
     def connectionLost(self, reason=protocol.connectionDone):
         """
@@ -123,6 +123,7 @@ def readBody(response):
             abort()
     d = defer.Deferred(cancel)
     proto = _ReadBodyProtocol(response.code, response.phrase, d)
+
     def getAbort():
         return getattr(proto.transport, 'abortConnection', None)
 
