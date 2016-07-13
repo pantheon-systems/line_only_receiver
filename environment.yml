@@ -1,7 +1,7 @@
 
 name: tx_clients
 channels:
-    - getpantheon
+    - pantheon
 dependencies:
     - python ==2.7.10
     - Twisted ==12.3.0
