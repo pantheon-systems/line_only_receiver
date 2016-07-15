@@ -12,7 +12,7 @@ dependencies:
     - conda update -y conda
     - conda install -y conda-build
     - conda install -y anaconda-client
-    - conda config --add channels $ANACONDA_CLOUD_CHANNEL
+    - conda config --add channels https://conda.anaconda.org/t/$ANACONDA_CLOUD_REPO_TOKEN/$ANACONDA_CLOUD_ORGANIZATION
     - conda config --set anaconda_upload yes
     - pip install coveralls
     - pip install flake8
