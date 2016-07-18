@@ -70,30 +70,39 @@ All BasicAgent's return a BasicResponse object. The BasicResponse object will au
 ### Agent Invocation
 Agents can be invoked both synchronously and asynchronously.
 
-__Asynchronous Example__
+__Idiomatic Asynchronous Example__
 
     from twisted.internet import reactor
     from twisted.web import client
 
     from tx_clients.clients import http
 
-    # Adding a pool is optional. A non persistent connection pool is created by default
-    pool = client.HTTPConnectionPool(reactor)
-    agent = http.BasicAgent(reactor, pool=pool)
-    d = agent.get('https://api.live.getpantheon.com:8443')
+    def main():
+        # Adding a pool is optional. A non persistent connection pool is created by default
+        pool = client.HTTPConnectionPool(reactor)
+        agent = http.BasicAgent(reactor, pool=pool)
+        d = agent.get('https://api.live.getpantheon.com:8443')
 
-    def print_response(response):
-        print response.body
+        def print_response(response):
+            print response.body
 
-    d.addCallback(print_response)
+        def catch_timeout(failure):
+            trapped = failure.trap(TimeoutError)
+            if trapped == TimeoutError:
+                print 'Request Timed Out'
 
+        d.addCallbacks(print_response, catch_timeout)
+        return d
+
+    d = main()
     def cbShutdown(response):
         reactor.stop()
     d.addBoth(cbShutdown)
 
     reactor.run()
 
-__Inline Callbacks Example__ - Also Asynchronous but marginally slower.
+__Inline Callbacks Example__ - Also Asynchronous but the code reads more like synchronous code.
+The main drawback of inline callbacks is that there is some overhead to constructing the decorator. Normally this is marginal. However, if a function that is decorated is called many times within your app it can amount to a non-trivial amount of time spent. It just depends on where it is used.
 
     from twisted.internet import reactor, defer
     from twisted.web import client
@@ -105,11 +114,17 @@ __Inline Callbacks Example__ - Also Asynchronous but marginally slower.
         # Adding a pool is optional. A non persistent connection pool is created by default
         pool = client.HTTPConnectionPool(reactor)
         agent = http.BasicAgent(reactor, pool=pool)
-        response = yield agent.get('https://api.live.getpantheon.com:8443')
-        print response.body
-        reactor.stop()
+        try:
+            response = yield agent.get('https://api.live.getpantheon.com:8443')
+            print response.body
+        except TimeoutError:
+            print 'Request Timed Out'
 
-    main()
+    d = main()
+    def cbShutdown(response):
+        reactor.stop()
+    d.addBoth(cbShutdown)
+
     reactor.run()
 
 __Synchrnous Example__ - The Synchronous example requires [Crochet 1.4.0][] (Crochet 1.5.0 requires Twisted >= 15.0.0)
