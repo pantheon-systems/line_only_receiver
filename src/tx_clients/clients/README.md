@@ -101,7 +101,8 @@ __Idiomatic Asynchronous Example__
 
     reactor.run()
 
-__Inline Callbacks Example__ - Also Asynchronous but the code reads more like synchronous code.
+__Inline Callbacks Asynchronous Example__ - The code reads more like synchronous code.
+
 The main drawback of inline callbacks is that there is some overhead to constructing the decorator. Normally this is marginal. However, if a function that is decorated is called many times within your app it can amount to a non-trivial amount of time spent. It just depends on where it is used.
 
     from twisted.internet import reactor, defer
@@ -127,24 +128,27 @@ The main drawback of inline callbacks is that there is some overhead to construc
 
     reactor.run()
 
-__Synchrnous Example__ - The Synchronous example requires [Crochet 1.4.0][] (Crochet 1.5.0 requires Twisted >= 15.0.0)
+__Synchronous Example__ - The Synchronous example requires [Crochet 1.4.0][] (Crochet 1.5.0 requires Twisted >= 15.0.0)
+    
+    from crochet import setup, wait_for, TimeoutError
+    setup()
 
     from twisted.internet import reactor
     from twisted.web import client
 
     from tx_clients.clients import http
-    
-    from crochet import setup, wait_for, TimeoutError
-    setup()
 
-    # Adding a pool is optional. A non persistent connection pool is created by default
-    pool = client.HTTPConnectionPool(reactor)
-    agent = http.BasicAgent(reactor, pool=pool)
-    try:
-        response = wait_for(timeout=1)(agent.get)('https://api.live.getpantheon.com:8443')
-        print response.body
-    except TimeoutError:
-        print 'Request Timed Out'
+    def main():
+        # Adding a pool is optional. A non persistent connection pool is created by default
+        pool = client.HTTPConnectionPool(reactor)
+        agent = http.BasicAgent(reactor, pool=pool)
+        try:
+            response = wait_for(timeout=1)(agent.get)('https://api.live.getpantheon.com:8443')
+            print response.body
+        except TimeoutError:
+            print 'Request Timed Out'
+    
+    main()
 
 ## Line Client
 __TODO: DEPRECATE__ The notification-service (i.e. pubsub proxy) also has an http interface. We should discontinue use of the line protocol to the notification-service and instead use the http client below.
