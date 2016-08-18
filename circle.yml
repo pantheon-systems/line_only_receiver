@@ -10,24 +10,31 @@ machine:
 dependencies:
   override:
     - conda update -y conda
-    - conda install -y conda-build
+    - conda install -y conda-build==1.21.7
     - conda install -y anaconda-client
     - conda config --add channels https://conda.anaconda.org/t/$ANACONDA_CLOUD_REPO_TOKEN/$ANACONDA_CLOUD_ORGANIZATION
-    - conda config --set anaconda_upload yes
+    - conda config --set anaconda_upload no
+    - pip install setuptools --upgrade
     - pip install coveralls
     - pip install flake8
+    - pip install pylint
+    - pip install functools32
+    - pip install mock
     - pip install bumpversion
+    - pip install backports.functools_lru_cache
+    - pip install -r requirements.txt
   cache_directories:
     - ~/miniconda
 
 test:
   override:
     - make flake8
+    - make test
+    - make lint
     - conda build --check recipe
     - conda build --build-only recipe
     - conda build --post recipe
     - conda build --test recipe --no-anaconda-upload
-    - mv $HOME/miniconda/conda-bld/test-tmp_dir/.coverage .
     - cp .coverage $CIRCLE_ARTIFACTS
     - coveralls
 
@@ -35,4 +42,5 @@ deployment:
   release:
     branch: master
     commands:
-      - conda build -q --user $ANACONDA_CLOUD_ORGANIZATION --token $ANACONDA_CLOUD_DEPLOY_TOKEN recipe
+      - make circle_deploy_conda
+      - make circle_deploy_pypi
