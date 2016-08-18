@@ -54,7 +54,7 @@ flake8: ## Run flake8 against the apps source. CANNOT be run on build. Requires 
 
 circle_deploy_pypi: ## Build and Upload pypi package from circle
 	python setup.py sdist
-	anaconda --token $(ANACONDA_CLOUD_DEPLOY_TOKEN) upload -u $(ANACONDA_CLOUD_ORGANIZATION) --label main --no-register --force dist/ticket_management-$(VERSION).tar.gz
+	anaconda --token $(ANACONDA_CLOUD_DEPLOY_TOKEN) upload -u $(ANACONDA_CLOUD_ORGANIZATION) --label main --no-register --force dist/$(APP)-$(VERSION).tar.gz
 
 circle_deploy_conda: ## Build and Upload conda package from circle
 	conda build -q --user $(ANACONDA_CLOUD_ORGANIZATION) --token $(ANACONDA_CLOUD_DEPLOY_TOKEN) recipe
