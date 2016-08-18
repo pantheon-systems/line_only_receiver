@@ -1,11 +1,13 @@
-APP := "tx_clients"
-VERSION := "0.2.1" # Managed by bumpversion. Do not modify.
+APP := tx_clients
+VERSION := 0.2.2# Managed by bumpversion. Do not modify.
 
-TEST_RUNNER := `which trial`
+TEST_RUNNER := `which trial` # This is intentionally a string
+
+ACTIVE_ENVIRONMENT := $(shell basename $${CONDA_DEFAULT_ENV:-'null'})
 
 check_active: ## Check the active conda environment before allowing certain targets.
-ifeq ("$(CONDA_DEFAULT_ENV)", "_test")
-else ifneq ("$(CONDA_DEFAULT_ENV)", $(APP))
+ifeq ("$(ACTIVE_ENVIRONMENT)", "_test")
+else ifneq ($(ACTIVE_ENVIRONMENT), $(APP))
 	printf "\nThe active conda environment is \"$(CONDA_DEFAULT_ENV)\". This target expects the active environment to be \"$(APP)\".\n\n"
 	printf "If you have not yet created the environment, run:\n\n    conda env create\n\n"
 	printf "To activate the environment, run:\n\n    source activate $(APP)\n\n"
@@ -38,23 +40,28 @@ uninstall: check_active ## Uninstall the latest build of our app from the defaul
 build: check_active ## Build from the conda recipe.
 	conda build recipe
 
-test: check_active ## Run trial unittest runner against app. Must be installed or in develop mode. Requires Twisted
+test: ## Run trial unittest runner against app. Must be installed or in develop mode. Requires Twisted
 	coverage run --branch --source $(APP) $(TEST_RUNNER) $(APP)
 
 coverage: ## Display the coverage report. Requires that make test has been run.
 	coverage report
 
-lint: check_active ## Run pylint against the app. Must be installed or in develop mode. Requires pylint
+lint: ## Run pylint against the app. Must be installed or in develop mode. Requires pylint
 	pylint $(APP)
 
 flake8: ## Run flake8 against the apps source. CANNOT be run on build. Requires flake8
-	 flake8 --show-source --statistics --benchmark src/$(APP)
+	 flake8 --show-source --statistics --benchmark $(APP)
+
+circle_deploy_pypi: ## Build and Upload pypi package from circle
+	python setup.py sdist
+	anaconda --token $(ANACONDA_CLOUD_DEPLOY_TOKEN) upload -u $(ANACONDA_CLOUD_ORGANIZATION) --label main --no-register --force dist/ticket_management-$(VERSION).tar.gz
+
+circle_deploy_conda: ## Build and Upload conda package from circle
+	conda build -q --user $(ANACONDA_CLOUD_ORGANIZATION) --token $(ANACONDA_CLOUD_DEPLOY_TOKEN) recipe
 
 help: ## Print list of tasks and descriptions
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .DEFAULT_GOAL := help
-
-.PHONY := all
 
 .SILENT: check_active
