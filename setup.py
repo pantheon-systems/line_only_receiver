@@ -16,7 +16,7 @@ setup(
     zip_safe=False, # pylint and coverage have trouble traversing zipped eggs
     install_requires=[
         "txconnpool>=0.1",
-        "Twisted>=12.2.0",
+        "Twisted>=16.3.0",
         "wrapt>=1.6.0"
     ],
 )
