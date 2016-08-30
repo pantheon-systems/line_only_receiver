@@ -1,6 +1,6 @@
 package:
   name: "tx_clients"
-  version: "0.2.2" # Managed by bumpversion. Do not modify.
+  version: "0.3.0" # Managed by bumpversion. Do not modify.
 
 source:
   git_rev: {{ environ.get('CIRCLE_BRANCH', '') }}
@@ -15,14 +15,14 @@ requirements:
     - python ==2.7.10
     - setuptools
     - twisted ==16.3.0
-    - txconnpool ==0.1.1
     - wrapt >=1.6.0
+    - service_identity
 
   run:
     - python ==2.7.10
     - twisted ==16.3.0
-    - txconnpool ==0.1.1
     - wrapt >=1.6.0
+    - service_identity
 
 test:
   files:
