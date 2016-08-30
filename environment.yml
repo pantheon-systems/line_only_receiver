@@ -5,11 +5,11 @@ channels:
 dependencies:
     - python ==2.7.10
     - Twisted ==16.3.0
-    - txconnpool >=0.1.1
     - pylint
     - coverage
     - wrapt
     - flake8
     - mock
+    - service_identity
     - pip:
         - bumpversion

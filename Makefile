@@ -1,5 +1,5 @@
 APP := tx_clients
-VERSION := 0.2.2# Managed by bumpversion. Do not modify.
+VERSION := 0.3.0# Managed by bumpversion. Do not modify.
 
 TEST_RUNNER := `which trial` # This is intentionally a string
 

@@ -11,7 +11,6 @@ from twisted.test.proto_helpers import StringTransport
 
 
 from tx_clients.utils.web import (
-    readBody,
     JSONBodyProducer,
     StringBodyProducer
 )
@@ -73,7 +72,7 @@ class BasicResponse(object):
     def deliverBody(self):
         if self._response.code in http.NO_BODY_CODES or self.method == 'HEAD':
             return defer.succeed(self)
-        d = readBody(self._response)
+        d = client.readBody(self._response)
         d.addCallback(self.cbAttachBody)
         return d
 

@@ -1,15 +1,16 @@
 import random
 import wrapt
 
-from twisted.python import log
+from twisted import logger
 from twisted.internet import task
+
+log = logger.Logger()
 
 
 class Retry(object):
     """
-    A class decorator to retry a command on a connection pool. Retry attempts
-    use an exponential backoff algorithm. Commands MUST return a deferred
-    object.
+    A general purpose class decorator to retry a function which returns a
+    deferred. Retry attempts use an exponential backoff algorithm.
 
     @ivar factor: A multiplicitive factor by which the delay grows
     @ivar jitter: Percentage of randomness to introduce into the delay length
@@ -81,7 +82,7 @@ class Retry(object):
             return failure
 
         if self.noisy:
-            log.msg(
+            log.info(
                 "Retrying function {} in {} seconds {}/{}".format(
                     self._wrapped,
                     delay,
