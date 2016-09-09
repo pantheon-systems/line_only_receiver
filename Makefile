@@ -1,7 +1,7 @@
 APP := tx_clients
-VERSION := 0.3.0# Managed by bumpversion. Do not modify.
+VERSION := 0.3.1# Managed by bumpversion. Do not modify.
 
-TEST_RUNNER := `which trial` # This is intentionally a string
+TEST_RUNNER := `which trial`# This is intentionally a string
 
 ACTIVE_ENVIRONMENT := $(shell basename $${CONDA_DEFAULT_ENV:-'null'})
 
@@ -58,6 +58,9 @@ circle_deploy_pypi: ## Build and Upload pypi package from circle
 
 circle_deploy_conda: ## Build and Upload conda package from circle
 	conda build -q --user $(ANACONDA_CLOUD_ORGANIZATION) --token $(ANACONDA_CLOUD_DEPLOY_TOKEN) recipe
+
+clean: ## Removes all untracked files and directories including those ignored by git
+	git clean -Xfd
 
 help: ## Print list of tasks and descriptions
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

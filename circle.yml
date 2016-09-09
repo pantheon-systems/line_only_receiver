@@ -29,8 +29,10 @@ dependencies:
 test:
   override:
     - make flake8
+    - python setup.py develop
     - make test
     - make lint
+    - python setup.py develop --uninstall
     - conda build --check recipe
     - conda build --build-only recipe
     - conda build --post recipe

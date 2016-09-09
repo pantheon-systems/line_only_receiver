@@ -1,4 +1,4 @@
-twisted==16.3.0
-wrapt==1.6.0
-pyopenssl
-service_identity
+twisted==16.4.0
+pyopenssl==16.0.0
+service_identity==16.0.0
+wrapt==1.10.6
