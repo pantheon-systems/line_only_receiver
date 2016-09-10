@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "0.3.0" # Managed by bumpversion. Do not modify.
+__version__ = "0.3.1" # Managed by bumpversion. Do not modify.
 
 setup(
     name='tx_clients',
@@ -15,8 +15,9 @@ setup(
     packages=find_packages(),
     zip_safe=False, # pylint and coverage have trouble traversing zipped eggs
     install_requires=[
-        "Twisted>=16.3.0",
-        "wrapt>=1.6.0",
-        "service_identity>=16.0.0"
+        "Twisted>=16.4.0",
+        "pyopenssl>=16.0.0",
+        "service_identity>=16.0.0",
+        "wrapt>=1.10.6",
     ],
 )

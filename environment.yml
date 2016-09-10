@@ -4,12 +4,13 @@ channels:
     - pantheon
 dependencies:
     - python ==2.7.10
-    - Twisted ==16.3.0
+    - twisted ==16.4.0
+    - pyopenssl ==16.0.0
+    - service_identity ==16.0.0
+    - wrapt ==1.10.6
     - pylint
     - coverage
-    - wrapt
     - flake8
     - mock
-    - service_identity
     - pip:
         - bumpversion
